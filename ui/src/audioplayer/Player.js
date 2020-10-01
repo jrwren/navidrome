@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom'
 import { useAuthState, useDataProvider, useTranslate } from 'react-admin'
 import ReactJkMusicPlayer from 'react-jinke-music-player'
 import 'react-jinke-music-player/assets/index.css'
+import Hotkeys from 'react-hot-keys'
+import withWidth from '@material-ui/core/withWidth'
+import { makeStyles } from '@material-ui/core/styles'
 import subsonic from '../subsonic'
 import {
   scrobble,
@@ -14,10 +17,8 @@ import {
   clearQueue,
 } from './queue'
 import themes from '../themes'
-import { makeStyles } from '@material-ui/core/styles'
 import config from '../config'
 import PlayerToolbar from './PlayerToolbar'
-import Hotkeys from 'react-hot-keys'
 
 const useStyle = makeStyles((theme) => ({
   audioTitle: {
@@ -31,7 +32,8 @@ const useStyle = makeStyles((theme) => ({
 
 let audioInstance = null
 
-const Player = () => {
+const Player = ({ width }) => {
+  const isXsmall = width === 'xs'
   const translate = useTranslate()
   const currentTheme = useSelector((state) => state.theme)
   const theme = themes[currentTheme] || themes.DarkTheme
@@ -45,15 +47,22 @@ const Player = () => {
   const classes = useStyle({ visible })
 
   const audioTitle = useCallback(
-    (audioInfo) => (
-      <Link
-        to={`/album/${audioInfo.albumId}/show`}
-        className={classes.audioTitle}
-      >
-        {audioInfo.name ? `${audioInfo.name} - ${audioInfo.singer}` : ''}
-      </Link>
-    ),
-    [classes.audioTitle]
+    (audioInfo) => {
+      const title = audioInfo.name
+        ? `${audioInfo.name} - ${audioInfo.singer}`
+        : ''
+      return isXsmall ? (
+        title
+      ) : (
+        <Link
+          to={`/album/${audioInfo.albumId}/show`}
+          className={classes.audioTitle}
+        >
+          {title}
+        </Link>
+      )
+    },
+    [classes.audioTitle, isXsmall]
   )
 
   const defaultOptions = {
@@ -237,4 +246,4 @@ const Player = () => {
   )
 }
 
-export default Player
+export default withWidth()(Player)
